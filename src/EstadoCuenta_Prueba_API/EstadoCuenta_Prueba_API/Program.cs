@@ -1,5 +1,4 @@
-using Infrastructure.DataBase.DBContext;
-using Microsoft.EntityFrameworkCore;
+using Configuration.DependencyInjection;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -10,14 +9,9 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-//Inyeccion de contexto de base de datos
-builder.Services.AddDbContext<ApplicationDbContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"))
-);
-
-//Inyeccion de dependencias (Migrar a una libreria de clases)
-builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
-
+//Servicios declarados en Configuration.DI.DependencyResolver
+var configuration = builder.Configuration;
+builder.Services.ConfigureInfraestructure(configuration);
 
 var app = builder.Build();
 
