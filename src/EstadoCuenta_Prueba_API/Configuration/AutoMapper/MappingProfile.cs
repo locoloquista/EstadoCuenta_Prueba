@@ -15,11 +15,13 @@ namespace Configuration.AutoMapper
         private void MappingRepositorytoDto()
         {
             CreateMap<ClienteRepository, ClienteDTO>();
+            CreateMap<TarjetaCreditoRepository, TarjetaCreditoDTO>();
         }
 
         private void MappingDtoToRepository()
         {
             CreateMap<ClienteDTO, ClienteRepository>();
+            CreateMap<TarjetaCreditoDTO, TarjetaCreditoRepository>();
         }
     }
 }
