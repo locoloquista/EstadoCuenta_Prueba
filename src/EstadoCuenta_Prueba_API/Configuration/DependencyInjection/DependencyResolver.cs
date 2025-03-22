@@ -1,13 +1,19 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+﻿using BussinesLogic;
+using Configuration.AutoMapper;
+using Infrastructure.DataBase.DataAccess;
 using Infrastructure.DataBase.DBContext;
+using Infrastructure.Mapping;
+using InterfaceAdapter.BussinesLogic;
+using InterfaceAdapter.DataAccess;
+using InterfaceAdapter.Mapping;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
-using Configuration.AutoMapper;
+using Microsoft.Extensions.DependencyInjection;
 
 
 namespace Configuration.DependencyInjection
 {
-   public static class DependencyResolver
+    public static class DependencyResolver
     {
         public static IServiceCollection ConfigureInfraestructure(this IServiceCollection services, IConfiguration configuration)
         {
@@ -22,8 +28,25 @@ namespace Configuration.DependencyInjection
 
 
             //Inyecion de dependencias
-            services.AddScoped<IUnitOfWork, UnitOfWork>();
+            services.AddTransient<IUnitOfWork, UnitOfWork>();
+            services.AddTransient<IParser, Parser>();
 
+
+            return services;
+        }
+
+        public static IServiceCollection ConfigureBussinesLogic(this IServiceCollection services)
+        {
+            //Inyecion de dependencias
+            services.AddTransient<IClienteBOL, ClienteBOL>();
+
+            return services;
+        }
+
+        public static IServiceCollection ConfigureDataAccess(this IServiceCollection services)
+        {
+            //Inyecion de dependencias
+            services.AddTransient<IClienteDAO, ClienteDAO>();
 
             return services;
         }

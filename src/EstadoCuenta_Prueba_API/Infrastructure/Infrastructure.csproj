@@ -19,8 +19,4 @@
     <ProjectReference Include="..\InterfaceAdapter\InterfaceAdapter.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="DataBase\DataAccess\" />
-  </ItemGroup>
-
 </Project>

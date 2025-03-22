@@ -1,4 +1,6 @@
 ﻿using AutoMapper;
+using Infrastructure.DataBase.Repository;
+using InterfaceAdapter.DTO.BussinesLogic;
 
 namespace Configuration.AutoMapper
 {
@@ -6,12 +8,18 @@ namespace Configuration.AutoMapper
     {
         public MappingProfile()
         {
-            MappingEntitytoDto();
+            MappingRepositorytoDto();
+            MappingDtoToRepository();
         }
 
-        private void MappingEntitytoDto()
+        private void MappingRepositorytoDto()
         {
-            //CreateMap<ClaseOrigen, ClaseDestino>();
+            CreateMap<ClienteRepository, ClienteDTO>();
+        }
+
+        private void MappingDtoToRepository()
+        {
+            CreateMap<ClienteDTO, ClienteRepository>();
         }
     }
 }

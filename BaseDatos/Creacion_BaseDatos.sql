@@ -46,15 +46,6 @@ CREATE TABLE transacciones (
     activo bit NOT NULL DEFAULT 1
 );
 
--- Tabla de Pagos
-CREATE TABLE pagos (
-    id bigint PRIMARY KEY IDENTITY(1,1),
-    tarjeta_id bigint NOT NULL FOREIGN KEY REFERENCES tarjetas_credito(id),
-    fecha_pago date NOT NULL,
-    monto decimal(10, 2) NOT NULL,
-    activo bit NOT NULL DEFAULT 1
-);
-
 -- Tabla de Configuraciones de Intereses
 CREATE TABLE configuraciones_intereses (
     id bigint PRIMARY KEY IDENTITY(1,1),
@@ -93,6 +84,11 @@ BEGIN
 END;
 
 -- Procedimiento para obtener el estado de cuenta
+-- Verificar si el procedimiento ya existe y eliminarlo
+IF OBJECT_ID('ObtenerEstadoCuenta', 'P') IS NOT NULL
+    DROP PROCEDURE ObtenerEstadoCuenta;
+GO
+-- Crear el procedimiento almacenado
 CREATE PROCEDURE ObtenerEstadoCuenta
     @TarjetaId bigint
 AS
@@ -117,7 +113,42 @@ BEGIN
     GROUP BY tc.numero_tarjeta, c.nombre, c.apellido_paterno, c.apellido_materno, tc.saldo_actual, tc.limite_credito, ci.tasa_interes, ci.tasa_pago_minimo;
 END;
 
+
+-- Procedimiento para obtener informacion de clientes
+-- Verificar si el procedimiento ya existe y eliminarlo
+IF OBJECT_ID('ObtenerInformacionClientes', 'P') IS NOT NULL
+    DROP PROCEDURE ObtenerInformacionClientes;
+GO
+-- Crear el procedimiento almacenado
+CREATE PROCEDURE ObtenerInformacionClientes
+AS
+BEGIN
+    BEGIN TRY
+        -- Seleccionar información de los clientes y el número de tarjetas activas asociadas
+        SELECT 
+            c.id AS ClienteId,
+            CONCAT(c.nombre, ' ', c.apellido_paterno, ' ', ISNULL(c.apellido_materno, '')) AS NombreCompleto,
+            COUNT(tc.id) AS NumeroTarjetasActivas
+        FROM clientes c
+        LEFT JOIN tarjetas_credito tc ON c.id = tc.cliente_id AND tc.activo = 1
+        WHERE c.activo = 1
+        GROUP BY c.id, c.nombre, c.apellido_paterno, c.apellido_materno
+        ORDER BY c.id;
+    END TRY
+    BEGIN CATCH
+        -- Registrar el error en la bitácora
+        DECLARE @ErrorMessage nvarchar(MAX) = ERROR_MESSAGE();
+        EXEC RegistrarBitacora 'clientes/tarjetas_credito', 'error', 0, 'Sistema', @ErrorMessage;
+    END CATCH;
+END;
+GO
+
 -- Procedimiento para obtener transacciones realizadas por tarjeta en el mes
+-- Verificar si el procedimiento ya existe y eliminarlo
+IF OBJECT_ID('ObtenerTransaccionesDelMes', 'P') IS NOT NULL
+    DROP PROCEDURE ObtenerTransaccionesDelMes;
+GO
+-- Crear el procedimiento almacenado
 CREATE PROCEDURE ObtenerTransaccionesDelMes
     @TarjetaId bigint
 AS
@@ -139,14 +170,14 @@ BEGIN
         
         SELECT 
             'Pago' AS TipoTransaccion,
-            p.fecha_pago AS Fecha,
-            'Pago realizado' AS Descripcion,
+            p.fecha_transaccion AS Fecha,
+            p.descripcion AS Descripcion,
             p.monto AS Monto
-        FROM pagos p
+        FROM transacciones p
         WHERE p.tarjeta_id = @TarjetaId
           AND p.activo = 1
-          AND MONTH(p.fecha_pago) = MONTH(GETDATE())
-          AND YEAR(p.fecha_pago) = YEAR(GETDATE())
+          AND MONTH(p.fecha_transaccion) = MONTH(GETDATE())
+          AND YEAR(p.fecha_transaccion) = YEAR(GETDATE())
         
         ORDER BY Fecha DESC;
     END TRY
@@ -159,6 +190,11 @@ END;
 
 
 -- Procedimiento para agregar un cliente
+-- Verificar si el procedimiento ya existe y eliminarlo
+IF OBJECT_ID('AgregarCliente', 'P') IS NOT NULL
+    DROP PROCEDURE AgregarCliente;
+GO
+-- Crear el procedimiento almacenado
 CREATE PROCEDURE AgregarCliente
     @Nombre nvarchar(255),
     @ApellidoPaterno nvarchar(255),
@@ -198,6 +234,11 @@ BEGIN
 END;
 
 -- Procedimiento para agregar una tarjeta de crédito
+-- Verificar si el procedimiento ya existe y eliminarlo
+IF OBJECT_ID('AgregarTarjetaCredito', 'P') IS NOT NULL
+    DROP PROCEDURE AgregarTarjetaCredito;
+GO
+-- Crear el procedimiento almacenado
 CREATE PROCEDURE AgregarTarjetaCredito
     @ClienteId bigint,
     @NumeroTarjeta nvarchar(255),
@@ -232,95 +273,102 @@ BEGIN
     END CATCH;
 END;
 
--- Procedimiento para agregar una compra
-CREATE PROCEDURE AgregarCompra
+-- Verificar si el procedimiento ya existe y eliminarlo
+IF OBJECT_ID('AgregarTransaccion', 'P') IS NOT NULL
+    DROP PROCEDURE AgregarTransaccion;
+GO
+-- Crear el procedimiento para registrar compras y pagos
+CREATE PROCEDURE AgregarTransaccion
     @TarjetaId bigint,
     @FechaTransaccion date,
     @Descripcion nvarchar(255),
     @Monto decimal(10, 2),
+    @TipoTransaccionId bigint, -- ID del tipo de transacción ('compra' o 'pago')
     @Usuario nvarchar(255)
 AS
 BEGIN
     BEGIN TRY
         BEGIN TRANSACTION;
+
+        -- Validar que el tipo de transacción exista y esté activo
+        IF NOT EXISTS (SELECT 1 FROM tipos_transaccion WHERE id = @TipoTransaccionId AND activo = 1)
+        BEGIN
+            THROW 50000, 'El ID del tipo de transacción no es válido o está inactivo.', 1;
+        END
 
         -- Insertar la transacción
         INSERT INTO transacciones (tarjeta_id, fecha_transaccion, descripcion, monto, tipo_transaccion_id, activo)
-        VALUES (@TarjetaId, @FechaTransaccion, @Descripcion, @Monto, 
-                (SELECT id FROM tipos_transaccion WHERE nombre_tipo = 'compra' AND activo = 1), 1);
+        VALUES (
+            @TarjetaId, 
+            @FechaTransaccion, 
+            @Descripcion, 
+            @Monto, 
+            @TipoTransaccionId, 
+            1
+        );
 
-        -- Actualizar el saldo de la tarjeta (restar el monto)
-        UPDATE tarjetas_credito
-        SET saldo_actual = saldo_actual + @Monto
-        WHERE id = @TarjetaId;
+        -- Actualizar el saldo de la tarjeta
+        DECLARE @TipoTransaccion nvarchar(50);
+        SELECT @TipoTransaccion = nombre_tipo 
+        FROM tipos_transaccion 
+        WHERE id = @TipoTransaccionId;
 
-        DECLARE @TransaccionId bigint = SCOPE_IDENTITY();
+        IF @TipoTransaccion = 'compra'
+        BEGIN
+            -- Incrementar el saldo actual para una compra
+            UPDATE tarjetas_credito
+            SET saldo_actual = saldo_actual + @Monto
+            WHERE id = @TarjetaId;
+        END
+        ELSE IF @TipoTransaccion = 'pago'
+        BEGIN
+            -- Reducir el saldo actual para un pago
+            UPDATE tarjetas_credito
+            SET saldo_actual = saldo_actual - @Monto
+            WHERE id = @TarjetaId;
+        END
 
         -- Registrar en la bitácora
+        DECLARE @TransaccionId bigint = SCOPE_IDENTITY();
         DECLARE @BitacoraDescripcion nvarchar(max);
         SET @BitacoraDescripcion = 'TarjetaId: ' + CAST(@TarjetaId AS nvarchar) + 
                                    ', Fecha: ' + CAST(@FechaTransaccion AS nvarchar) + 
-                                   ', Monto: ' + CAST(@Monto AS nvarchar);
+                                   ', Monto: ' + CAST(@Monto AS nvarchar) + 
+                                   ', TipoTransaccionId: ' + CAST(@TipoTransaccionId AS nvarchar);
 
-        EXEC RegistrarBitacora 'transacciones', 'insertar', @TransaccionId, @Usuario, @BitacoraDescripcion;
+        EXEC RegistrarBitacora 
+            @Tabla = 'transacciones', 
+            @Accion = 'insertar', 
+            @RegistroId = @TransaccionId, 
+            @Usuario = @Usuario, 
+            @Datos = @BitacoraDescripcion;
 
+        -- Confirmar la transacción
         COMMIT TRANSACTION;
     END TRY
     BEGIN CATCH
+        -- Revertir la transacción en caso de error
         ROLLBACK TRANSACTION;
 
         -- Registrar el error en la bitácora
         DECLARE @ErrorMensaje nvarchar(max);
         SET @ErrorMensaje = ERROR_MESSAGE();
-
-        EXEC RegistrarBitacora 'transacciones', 'error', 0, @Usuario, @ErrorMensaje;
+        EXEC RegistrarBitacora 
+            @Tabla = 'transacciones', 
+            @Accion = 'error', 
+            @RegistroId = 0, 
+            @Usuario = @Usuario, 
+            @Datos = @ErrorMensaje;
     END CATCH;
 END;
-
--- Procedimiento para agregar un pago
-CREATE PROCEDURE AgregarPago
-    @TarjetaId bigint,
-    @FechaPago date,
-    @Monto decimal(10, 2),
-    @Usuario nvarchar(255)
-AS
-BEGIN
-    BEGIN TRY
-        BEGIN TRANSACTION;
-
-        -- Insertar el pago
-        INSERT INTO pagos (tarjeta_id, fecha_pago, monto, activo)
-        VALUES (@TarjetaId, @FechaPago, @Monto, 1);
-
-        -- Actualizar el saldo de la tarjeta (sumar el monto)
-        UPDATE tarjetas_credito
-        SET saldo_actual = saldo_actual - @Monto
-        WHERE id = @TarjetaId;
-
-        DECLARE @PagoId bigint = SCOPE_IDENTITY();
-
-        -- Registrar en la bitácora
-        DECLARE @BitacoraDescripcion nvarchar(max);
-        SET @BitacoraDescripcion = 'TarjetaId: ' + CAST(@TarjetaId AS nvarchar) + 
-                                   ', Fecha: ' + CAST(@FechaPago AS nvarchar) + 
-                                   ', Monto: ' + CAST(@Monto AS nvarchar);
-
-        EXEC RegistrarBitacora 'pagos', 'insertar', @PagoId, @Usuario, @BitacoraDescripcion;
-
-        COMMIT TRANSACTION;
-    END TRY
-    BEGIN CATCH
-        ROLLBACK TRANSACTION;
-
-        -- Registrar el error en la bitácora
-        DECLARE @ErrorMensaje nvarchar(max);
-        SET @ErrorMensaje = ERROR_MESSAGE();
-
-        EXEC RegistrarBitacora 'pagos', 'error', 0, @Usuario, @ErrorMensaje;
-    END CATCH;
-END;
+GO
 
 -- Procedimiento para revertir una compra
+-- Verificar si el procedimiento ya existe y eliminarlo
+IF OBJECT_ID('RevertirCompra', 'P') IS NOT NULL
+    DROP PROCEDURE RevertirCompra;
+GO
+-- Crear el procedimiento almacenado
 CREATE PROCEDURE RevertirCompra
     @TransaccionId bigint,
     @Usuario nvarchar(255)
@@ -367,52 +415,84 @@ BEGIN
     END CATCH;
 END;
 
+
 -- Procedimiento para revertir un pago
+-- Verificar si el procedimiento ya existe y eliminarlo
+IF OBJECT_ID('RevertirPago', 'P') IS NOT NULL
+    DROP PROCEDURE RevertirPago;
+GO
+
+-- Crear el procedimiento para revertir un pago
 CREATE PROCEDURE RevertirPago
-    @PagoId bigint,
+    @TransaccionId bigint, -- ID de la transacción a revertir
     @Usuario nvarchar(255)
 AS
 BEGIN
     BEGIN TRY
         BEGIN TRANSACTION;
 
-        -- Obtener el monto y la tarjeta asociada al pago
+        -- Validar que la transacción exista, sea un pago y esté activa
         DECLARE @Monto decimal(10, 2);
         DECLARE @TarjetaId bigint;
+        DECLARE @TipoTransaccion nvarchar(50);
 
-        SELECT @Monto = monto, @TarjetaId = tarjeta_id
-        FROM pagos
-        WHERE id = @PagoId AND activo = 1;
+        SELECT 
+            @Monto = monto, 
+            @TarjetaId = tarjeta_id,
+            @TipoTransaccion = (SELECT nombre_tipo 
+                                FROM tipos_transaccion 
+                                WHERE id = tipo_transaccion_id)
+        FROM transacciones
+        WHERE id = @TransaccionId AND activo = 1;
 
-        -- Marcar el pago como inactivo
-        UPDATE pagos
+        IF @TipoTransaccion IS NULL OR @TipoTransaccion != 'pago'
+        BEGIN
+            THROW 50000, 'La transacción no es un pago válido o ya ha sido revertida.', 1;
+        END
+
+        -- Marcar la transacción como inactiva
+        UPDATE transacciones
         SET activo = 0
-        WHERE id = @PagoId;
+        WHERE id = @TransaccionId;
 
-        -- Actualizar el saldo de la tarjeta (sumar el monto)
+        -- Actualizar el saldo de la tarjeta (sumar el monto del pago revertido)
         UPDATE tarjetas_credito
         SET saldo_actual = saldo_actual + @Monto
         WHERE id = @TarjetaId;
 
         -- Registrar en la bitácora
         DECLARE @BitacoraDescripcion nvarchar(max);
-        SET @BitacoraDescripcion = 'PagoId: ' + CAST(@PagoId AS nvarchar) + 
+        SET @BitacoraDescripcion = 'Reversión de pago. TransaccionId: ' + CAST(@TransaccionId AS nvarchar) + 
+                                   ', TarjetaId: ' + CAST(@TarjetaId AS nvarchar) + 
                                    ', Monto: ' + CAST(@Monto AS nvarchar);
 
-        EXEC RegistrarBitacora 'pagos', 'revertir', @PagoId, @Usuario, @BitacoraDescripcion;
+        EXEC RegistrarBitacora 
+            @Tabla = 'transacciones', 
+            @Accion = 'revertir', 
+            @RegistroId = @TransaccionId, 
+            @Usuario = @Usuario, 
+            @Datos = @BitacoraDescripcion;
 
+        -- Confirmar la transacción
         COMMIT TRANSACTION;
     END TRY
     BEGIN CATCH
+        -- Revertir la transacción en caso de error
         ROLLBACK TRANSACTION;
 
         -- Registrar el error en la bitácora
-        DECLARE @ErrorMensaje nvarchar(max);
-        SET @ErrorMensaje = ERROR_MESSAGE();
+        DECLARE @ErrorDescripcion nvarchar(max);
+        SET @ErrorDescripcion = 'Error al revertir el pago. Detalles: ' + ERROR_MESSAGE();
 
-        EXEC RegistrarBitacora 'pagos', 'error', @PagoId, @Usuario, @ErrorMensaje;
+        EXEC RegistrarBitacora 
+            @Tabla = 'transacciones', 
+            @Accion = 'error', 
+            @RegistroId = @TransaccionId, 
+            @Usuario = @Usuario, 
+            @Datos = @ErrorDescripcion;
     END CATCH;
 END;
+GO
 
 
 -- ============================================
@@ -472,12 +552,13 @@ VALUES
 -- ============================================
 -- INSERTAR TRANSACCIONES (COMPRAS Y PAGOS)
 -- ============================================
+-- Generar transacciones para cada tarjeta
 DECLARE @TarjetaId bigint;
 DECLARE @Fecha date;
 DECLARE @Monto decimal(10, 2);
 DECLARE @Descripcion nvarchar(255);
+DECLARE @TipoTransaccionId bigint;
 
--- Generar transacciones para cada tarjeta
 DECLARE tarjeta_cursor CURSOR FOR
 SELECT id FROM tarjetas_credito;
 
@@ -491,17 +572,22 @@ BEGIN
     DECLARE @Mes int = 0;
     WHILE @Mes < 3
     BEGIN
-        -- Generar entre 10 y 12 compras por mes
+        -- Generar entre 4 y 5 compras por mes
         DECLARE @Compras int = 0;
-        WHILE @Compras < 12
+        WHILE @Compras < 14
         BEGIN
             SET @Fecha = DATEADD(MONTH, -@Mes, GETDATE()) - ABS(CHECKSUM(NEWID())) % 28; -- Fecha aleatoria del mes
             SET @Monto = ABS(CHECKSUM(NEWID())) % 500 + 50; -- Monto aleatorio entre 50 y 550
             SET @Descripcion = 'Compra en tienda ' + CAST(ABS(CHECKSUM(NEWID())) % 100 AS nvarchar);
+            SET @TipoTransaccionId = (SELECT id FROM tipos_transaccion WHERE nombre_tipo = 'compra' AND activo = 1);
 
-            INSERT INTO transacciones (tarjeta_id, fecha_transaccion, descripcion, monto, tipo_transaccion_id, activo)
-            VALUES (@TarjetaId, @Fecha, @Descripcion, @Monto, 
-                    (SELECT id FROM tipos_transaccion WHERE nombre_tipo = 'compra'), 1);
+            EXEC AgregarTransaccion 
+                @TarjetaId = @TarjetaId, 
+                @FechaTransaccion = @Fecha, 
+                @Descripcion = @Descripcion, 
+                @Monto = @Monto, 
+                @TipoTransaccionId = @TipoTransaccionId, 
+                @Usuario = 'Sistema';
 
             SET @Compras = @Compras + 1;
         END;
@@ -510,11 +596,18 @@ BEGIN
         DECLARE @Pagos int = 0;
         WHILE @Pagos < 2
         BEGIN
-            SET @Fecha = DATEADD(MONTH, -@Mes, GETDATE()) - ABS(CHECKSUM(NEWID())) % 28; -- Fecha aleatoria del mes
+             SET @Fecha = DATEADD(MONTH, -@Mes, GETDATE()) - ABS(CHECKSUM(NEWID())) % 28; -- Fecha aleatoria del mes
             SET @Monto = ABS(CHECKSUM(NEWID())) % 300 + 100; -- Monto aleatorio entre 100 y 400
+            SET @Descripcion = 'Pago realizado';
+            SET @TipoTransaccionId = (SELECT id FROM tipos_transaccion WHERE nombre_tipo = 'pago' AND activo = 1);
 
-            INSERT INTO pagos (tarjeta_id, fecha_pago, monto, activo)
-            VALUES (@TarjetaId, @Fecha, @Monto, 1);
+            EXEC AgregarTransaccion 
+                @TarjetaId = @TarjetaId, 
+                @FechaTransaccion = @Fecha, 
+                @Descripcion = @Descripcion, 
+                @Monto = @Monto, 
+                @TipoTransaccionId = @TipoTransaccionId, 
+                @Usuario = 'Sistema';
 
             SET @Pagos = @Pagos + 1;
         END;
@@ -527,3 +620,5 @@ END;
 
 CLOSE tarjeta_cursor;
 DEALLOCATE tarjeta_cursor;
+
+
