@@ -143,6 +143,79 @@ BEGIN
 END;
 GO
 
+-- Verificar si el procedimiento ya existe y eliminarlo
+IF OBJECT_ID('ObtenerInformacionClientePorId', 'P') IS NOT NULL
+    DROP PROCEDURE ObtenerInformacionClientePorId;
+GO
+-- Crear el procedimiento para obtener información del cliente y sus tarjetas
+CREATE PROCEDURE ObtenerInformacionClientePorId
+    @ClienteId bigint
+AS
+BEGIN
+    BEGIN TRY
+        -- Obtener información del cliente
+         SELECT 
+            c.id AS ClienteId,
+            CONCAT(c.nombre, ' ', c.apellido_paterno, ' ', ISNULL(c.apellido_materno, '')) AS NombreCompleto,
+            COUNT(tc.id) AS NumeroTarjetasActivas
+        FROM clientes c
+        LEFT JOIN tarjetas_credito tc ON c.id = tc.cliente_id AND tc.activo = 1
+        WHERE c.id = @ClienteId and c.activo = 1
+		GROUP BY c.id, c.nombre, c.apellido_paterno, c.apellido_materno
+    END TRY
+    BEGIN CATCH
+        -- Registrar el error en la bitácora
+        DECLARE @ErrorDescripcion nvarchar(max);
+        SET @ErrorDescripcion = 'Error al obtener información del cliente. Detalles: ' + ERROR_MESSAGE();
+
+        EXEC RegistrarBitacora 
+            @Tabla = 'clientes/tarjetas_credito', 
+            @Accion = 'error', 
+            @RegistroId = @ClienteId, 
+            @Usuario = 'Sistema', 
+            @Datos = @ErrorDescripcion;
+    END CATCH;
+END;
+GO
+
+-- Verificar si el procedimiento ya existe y eliminarlo
+IF OBJECT_ID('ObtenerInformacionTarjetasPorClienteId', 'P') IS NOT NULL
+    DROP PROCEDURE ObtenerInformacionTarjetasPorClienteId;
+GO
+-- Crear el procedimiento para obtener información del cliente y sus tarjetas
+CREATE PROCEDURE ObtenerInformacionTarjetasPorClienteId
+    @ClienteId bigint
+AS
+BEGIN
+    BEGIN TRY
+        -- Obtener información del cliente
+        SELECT 
+            tc.id AS TarjetaId,
+            tc.numero_tarjeta AS NumeroTarjeta,
+            tc.limite_credito AS LimiteCredito,
+            tc.saldo_actual AS SaldoActual,
+            (tc.limite_credito - tc.saldo_actual) AS MontoDisponible,
+            tc.activo AS TarjetaActiva
+        FROM tarjetas_credito tc
+        WHERE tc.cliente_id = @ClienteId
+        ORDER BY tc.id;
+    END TRY
+    BEGIN CATCH
+        -- Registrar el error en la bitácora
+        DECLARE @ErrorDescripcion nvarchar(max);
+        SET @ErrorDescripcion = 'Error al obtener información de las tarjetas de cliente. Detalles: ' + ERROR_MESSAGE();
+
+        EXEC RegistrarBitacora 
+            @Tabla = 'clientes/tarjetas_credito', 
+            @Accion = 'error', 
+            @RegistroId = @ClienteId, 
+            @Usuario = 'Sistema', 
+            @Datos = @ErrorDescripcion;
+    END CATCH;
+END;
+GO
+
+
 -- Procedimiento para obtener transacciones realizadas por tarjeta en el mes
 -- Verificar si el procedimiento ya existe y eliminarlo
 IF OBJECT_ID('ObtenerTransaccionesDelMes', 'P') IS NOT NULL

@@ -17,5 +17,10 @@ namespace BussinesLogic
         {
             return await _clienteDAO.GetAllCliente();
         }
+
+        public async Task<ClienteDTO> GetClientebyId(int idCliente)
+        {
+            return await _clienteDAO.GetClientebyId(idCliente);
+        }
     }
 }

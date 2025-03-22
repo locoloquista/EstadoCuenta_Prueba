@@ -35,29 +35,23 @@ namespace EstadoCuenta_Prueba_API.Controllers
             return response;
         }
 
-        // GET api/<ClienteController>/5
-        [HttpGet("{id}")]
-        public string Get(int id)
+        [HttpGet("GetClientebyId")]
+        public async Task<ResponseMessage<ClienteDTO>> GetClientebyId(int idCliente)
         {
-            return "value";
-        }
+            ResponseMessage<ClienteDTO> response;
 
-        // POST api/<ClienteController>
-        [HttpPost]
-        public void Post([FromBody] string value)
-        {
-        }
+            try
+            {
+                var result = await _clienteBOL.GetClientebyId(idCliente);
 
-        // PUT api/<ClienteController>/5
-        [HttpPut("{id}")]
-        public void Put(int id, [FromBody] string value)
-        {
-        }
+                response = new ResponseMessage<ClienteDTO>("200: Success", true, result);
+            }
+            catch (Exception ex)
+            {
+                response = new ResponseMessage<ClienteDTO>("500: Error " + ex.Message, false, new ClienteDTO());
+            }
 
-        // DELETE api/<ClienteController>/5
-        [HttpDelete("{id}")]
-        public void Delete(int id)
-        {
+            return response;
         }
     }
 }
