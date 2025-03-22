@@ -6,6 +6,7 @@ using Infrastructure.Mapping;
 using InterfaceAdapter.BussinesLogic;
 using InterfaceAdapter.DataAccess;
 using InterfaceAdapter.Mapping;
+using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -15,12 +16,15 @@ namespace Configuration.DependencyInjection
 {
     public static class DependencyResolver
     {
-        public static IServiceCollection ConfigureInfraestructure(this IServiceCollection services, IConfiguration configuration)
+        public static void ConfigureInfraestructure(this IServiceCollection services, IConfiguration configuration)
         {
             //Inyectar contexto de base de datos
+            var connectionString = configuration.GetConnectionString("DefaultConnection");
+            // Registrar ApplicationDbContext con la conexión de base de datos
             services.AddDbContext<ApplicationDbContext>(options =>
-                options.UseSqlServer(configuration.GetConnectionString("DefaultConnection"))
-            );
+                options.UseSqlServer(connectionString));
+            // Registrar SqlConnection
+            services.AddTransient<SqlConnection>(provider => new SqlConnection(connectionString));
 
 
             //Configuracion de AutoMapper
@@ -31,24 +35,20 @@ namespace Configuration.DependencyInjection
             services.AddTransient<IUnitOfWork, UnitOfWork>();
             services.AddTransient<IParser, Parser>();
 
-
-            return services;
         }
 
-        public static IServiceCollection ConfigureBussinesLogic(this IServiceCollection services)
+        public static void ConfigureBussinesLogic(this IServiceCollection services)
         {
             //Inyecion de dependencias
             services.AddTransient<IClienteBOL, ClienteBOL>();
 
-            return services;
         }
 
-        public static IServiceCollection ConfigureDataAccess(this IServiceCollection services)
+        public static void ConfigureDataAccess(this IServiceCollection services)
         {
             //Inyecion de dependencias
             services.AddTransient<IClienteDAO, ClienteDAO>();
 
-            return services;
         }
     }
 }

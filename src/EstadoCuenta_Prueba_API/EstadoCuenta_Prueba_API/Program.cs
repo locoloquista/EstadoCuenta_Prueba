@@ -1,13 +1,4 @@
-using BussinesLogic;
 using Configuration.DependencyInjection;
-using Infrastructure.DataBase.DataAccess;
-using Infrastructure.DataBase.DBContext;
-using Infrastructure.Mapping;
-using InterfaceAdapter.BussinesLogic;
-using InterfaceAdapter.DataAccess;
-using InterfaceAdapter.Mapping;
-using Microsoft.Data.SqlClient;
-using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -22,22 +13,7 @@ builder.Services.AddSwaggerGen();
 var configuration = builder.Configuration;
 builder.Services.ConfigureInfraestructure(configuration);
 builder.Services.ConfigureBussinesLogic();
-
-
-// Configurar la cadena de conexión
-var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
-// Registrar ApplicationDbContext con la conexión de base de datos
-builder.Services.AddDbContext<ApplicationDbContext>(options =>
-    options.UseSqlServer(connectionString));
-// Registrar SqlConnection
-builder.Services.AddTransient<SqlConnection>(provider => new SqlConnection(connectionString));
-
-
-builder.Services.AddTransient<IUnitOfWork, UnitOfWork>();
-builder.Services.AddTransient<IParser, Parser>();
-builder.Services.AddTransient<IClienteBOL, ClienteBOL>();
-builder.Services.AddTransient<IClienteDAO, ClienteDAO>();
-
+builder.Services.ConfigureDataAccess();
 
 var app = builder.Build();
 
