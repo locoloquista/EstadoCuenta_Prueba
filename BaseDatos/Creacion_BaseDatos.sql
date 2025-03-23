@@ -84,35 +84,88 @@ BEGIN
 END;
 
 -- Procedimiento para obtener el estado de cuenta
--- Verificar si el procedimiento ya existe y eliminarlo
 IF OBJECT_ID('ObtenerEstadoCuenta', 'P') IS NOT NULL
     DROP PROCEDURE ObtenerEstadoCuenta;
 GO
+
 -- Crear el procedimiento almacenado
 CREATE PROCEDURE ObtenerEstadoCuenta
     @TarjetaId bigint
 AS
 BEGIN
-    SELECT 
-        tc.numero_tarjeta,
-        CONCAT(c.nombre, ' ', c.apellido_paterno, ' ', ISNULL(c.apellido_materno, '')) AS nombre_cliente,
-        tc.saldo_actual AS saldo_total,
-        tc.limite_credito,
-        (tc.limite_credito - tc.saldo_actual) AS saldo_disponible,
-        SUM(CASE WHEN t.fecha_transaccion >= DATEADD(MONTH, DATEDIFF(MONTH, 0, GETDATE()), 0) THEN t.monto ELSE 0 END) AS compras_mes_actual,
-        SUM(CASE WHEN t.fecha_transaccion >= DATEADD(MONTH, DATEDIFF(MONTH, 0, GETDATE()) - 1, 0) AND t.fecha_transaccion < DATEADD(MONTH, DATEDIFF(MONTH, 0, GETDATE()), 0) THEN t.monto ELSE 0 END) AS compras_mes_anterior,
-        ci.tasa_interes,
-        (tc.saldo_actual * ci.tasa_interes / 100) AS interes_bonificable,
-        (tc.saldo_actual * ci.tasa_pago_minimo / 100) AS cuota_minima,
-        (tc.saldo_actual + (tc.saldo_actual * ci.tasa_interes / 100)) AS pago_contado_con_intereses
-    FROM tarjetas_credito tc
-    INNER JOIN clientes c ON tc.cliente_id = c.id
-    LEFT JOIN transacciones t ON tc.id = t.tarjeta_id AND t.activo = 1
-    CROSS JOIN configuraciones_intereses ci
-    WHERE tc.id = @TarjetaId AND tc.activo = 1 AND c.activo = 1 AND ci.activo = 1
-    GROUP BY tc.numero_tarjeta, c.nombre, c.apellido_paterno, c.apellido_materno, tc.saldo_actual, tc.limite_credito, ci.tasa_interes, ci.tasa_pago_minimo;
-END;
+    BEGIN TRY
+        -- Usar una tabla derivada para calcular las transacciones
+        WITH TransaccionesFiltradas AS (
+            SELECT 
+                t.tarjeta_id,
+                t.monto,
+                t.fecha_transaccion,
+                tt.nombre_tipo AS tipo_transaccion
+            FROM transacciones t
+            INNER JOIN tipos_transaccion tt ON t.tipo_transaccion_id = tt.id
+            WHERE t.tarjeta_id = @TarjetaId AND t.activo = 1
+        )
+        SELECT 
+            tc.numero_tarjeta AS NumeroTarjeta,
+            CONCAT(c.nombre, ' ', c.apellido_paterno, ' ', ISNULL(c.apellido_materno, '')) AS NombreCliente,
+            tc.saldo_actual AS SaldoTotal,
+            tc.limite_credito AS LimiteCredito,
+            (tc.limite_credito - tc.saldo_actual) AS SaldoDisponible,
+            -- Compras realizadas en el mes actual
+            SUM(CASE 
+                WHEN tf.fecha_transaccion >= DATEADD(MONTH, DATEDIFF(MONTH, 0, GETDATE()), 0) 
+                     AND tf.tipo_transaccion = 'compra'
+                THEN tf.monto 
+                ELSE 0 
+            END) AS ComprasMesActual,
+            -- Compras realizadas en el mes anterior
+            SUM(CASE 
+                WHEN tf.fecha_transaccion >= DATEADD(MONTH, DATEDIFF(MONTH, 0, GETDATE()) - 1, 0) 
+                     AND tf.fecha_transaccion < DATEADD(MONTH, DATEDIFF(MONTH, 0, GETDATE()), 0)
+                     AND tf.tipo_transaccion = 'compra'
+                THEN tf.monto 
+                ELSE 0 
+            END) AS ComprasMesAnterior,
+            -- Configuración de intereses
+            ci.tasa_interes AS TasaInteres,
+            ci.tasa_pago_minimo AS TasaPagoMinimo,
+            -- Cálculo del interés bonificable
+            (tc.saldo_actual * ci.tasa_interes / 100) AS InteresBonificable,
+            -- Cálculo de la cuota mínima
+            (tc.saldo_actual * ci.tasa_pago_minimo / 100) AS CuotaMinima,
+            -- Cálculo del pago de contado con intereses
+            (tc.saldo_actual + (tc.saldo_actual * ci.tasa_interes / 100)) AS PagoContadoConIntereses
+        FROM tarjetas_credito tc
+        INNER JOIN clientes c ON tc.cliente_id = c.id
+        LEFT JOIN TransaccionesFiltradas tf ON tc.id = tf.tarjeta_id
+        CROSS JOIN configuraciones_intereses ci
+        WHERE tc.id = @TarjetaId AND tc.activo = 1 AND c.activo = 1 AND ci.activo = 1
+        GROUP BY 
+            tc.numero_tarjeta, 
+            c.nombre, 
+            c.apellido_paterno, 
+            c.apellido_materno, 
+            tc.saldo_actual, 
+            tc.limite_credito, 
+            ci.tasa_interes, 
+            ci.tasa_pago_minimo;
+    END TRY
+    BEGIN CATCH
+        -- Registrar el error en la bitácora
+        DECLARE @ErrorDescripcion nvarchar(max);
+        SET @ErrorDescripcion = 'Error al obtener el estado de cuenta. Detalles: ' + ERROR_MESSAGE();
 
+        EXEC RegistrarBitacora 
+            @Tabla = 'tarjetas_credito', 
+            @Accion = 'error', 
+            @RegistroId = @TarjetaId, 
+            @Usuario = 'Sistema', 
+            @Datos = @ErrorDescripcion;
+    END CATCH;
+END;
+GO
+EXEC ObtenerEstadoCuenta 
+    @TarjetaId = 2;
 
 -- Procedimiento para obtener informacion de clientes
 -- Verificar si el procedimiento ya existe y eliminarlo
@@ -621,6 +674,12 @@ INSERT INTO tipos_transaccion (nombre_tipo, activo)
 VALUES 
 ('compra', 1),
 ('pago', 1);
+
+-- ============================================
+-- INSERTAR TIPOS DE TRANSACCIÓN
+-- ============================================
+INSERT INTO configuraciones_intereses (tasa_interes, tasa_pago_minimo, fecha_vigencia, activo)
+VALUES (25, 5, '2999-12-12', 1);
 
 -- ============================================
 -- INSERTAR TRANSACCIONES (COMPRAS Y PAGOS)
