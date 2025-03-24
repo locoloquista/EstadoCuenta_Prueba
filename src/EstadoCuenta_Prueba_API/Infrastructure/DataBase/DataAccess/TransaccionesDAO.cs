@@ -35,5 +35,29 @@ namespace Infrastructure.DataBase.DataAccess
                 return await Task.FromResult(new List<TransaccionesDTO>());
             }
         }
+
+        public async Task<int> CreateTransaccionByIdTarjeta(TransaccionesDTO transaccion)
+        {
+            try
+            {
+                var parameters = new[]
+                {
+                    new SqlParameter("@TarjetaId", SqlDbType.BigInt) { Value = Convert.ToInt32(transaccion.TarjetaId) },
+                    new SqlParameter("@FechaTransaccion", SqlDbType.Date) { Value = transaccion.Fecha },
+                    new SqlParameter("@Descripcion", SqlDbType.NVarChar, 255) { Value = transaccion.Descripcion },
+                    new SqlParameter("@Monto", SqlDbType.Decimal) { Value = transaccion.Descripcion },
+                    new SqlParameter("@TipoTransaccionId", SqlDbType.BigInt) { Value = Convert.ToInt32(transaccion.TipoTransaccion) },
+                    new SqlParameter("@Usuario", SqlDbType.Decimal) { Value = "UsuarioWeb" }
+                };
+
+                var result = await _unitOfWork.ExecuteStoredProcedureAsync<int>("AgregarTransaccion", parameters);
+                return result;
+            }
+            catch (Exception ex)
+            {
+                // Manejar la excepción según sea necesario
+                return await Task.FromResult(0);
+            }
+        }
     }
 }

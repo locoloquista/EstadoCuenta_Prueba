@@ -282,6 +282,7 @@ BEGIN
     BEGIN TRY
         -- Seleccionar todas las transacciones (compras y pagos) del mes actual
         SELECT 
+			t.tarjeta_id,
             'Compra' AS TipoTransaccion,
             t.fecha_transaccion AS Fecha,
             t.descripcion AS Descripcion,
@@ -295,6 +296,7 @@ BEGIN
         UNION ALL
         
         SELECT 
+			p.tarjeta_id,
             'Pago' AS TipoTransaccion,
             p.fecha_transaccion AS Fecha,
             p.descripcion AS Descripcion,
@@ -471,6 +473,8 @@ BEGIN
 
         -- Confirmar la transacción
         COMMIT TRANSACTION;
+
+		return 1;
     END TRY
     BEGIN CATCH
         -- Revertir la transacción en caso de error
@@ -485,6 +489,8 @@ BEGIN
             @RegistroId = 0, 
             @Usuario = @Usuario, 
             @Datos = @ErrorMensaje;
+
+		return 0;
     END CATCH;
 END;
 GO

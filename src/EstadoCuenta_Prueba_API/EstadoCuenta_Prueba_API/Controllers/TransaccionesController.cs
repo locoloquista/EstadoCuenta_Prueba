@@ -34,5 +34,24 @@ namespace EstadoCuenta_Prueba_API.Controllers
 
             return response;
         }
+
+        [HttpPost("CreateTransaccionByIdTarjeta")]
+        public async Task<ResponseListMessage<TransaccionesDTO>> CreateTransaccionByIdTarjeta(TransaccionesDTO transaccion)
+        {
+            ResponseListMessage<TransaccionesDTO> response;
+
+            try
+            {
+                var result = await _transaccionesBOL.CreateTransaccionByIdTarjeta(transaccion);
+
+                response = new ResponseListMessage<TransaccionesDTO>("200: Success", true, result);
+            }
+            catch (Exception ex)
+            {
+                response = new ResponseListMessage<TransaccionesDTO>("500: Error " + ex.Message, false, new List<TransaccionesDTO>());
+            }
+
+            return response;
+        }
     }
 }

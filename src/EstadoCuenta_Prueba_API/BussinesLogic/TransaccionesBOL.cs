@@ -17,5 +17,13 @@ namespace BussinesLogic
         {
             return await _transaccionesDAO.GetTransaccionesByIdTarjeta(idTarjeta);
         }
+
+        public async Task<List<TransaccionesDTO>> CreateTransaccionByIdTarjeta(TransaccionesDTO transaccion)
+        {
+            await _transaccionesDAO.CreateTransaccionByIdTarjeta(transaccion);
+
+            return await _transaccionesDAO.GetTransaccionesByIdTarjeta(transaccion.TarjetaId);
+        }
+
     }
 }

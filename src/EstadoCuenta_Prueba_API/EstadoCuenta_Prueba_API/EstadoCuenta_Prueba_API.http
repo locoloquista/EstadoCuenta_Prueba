@@ -1,6 +1,12 @@
 @EstadoCuenta_Prueba_API_HostAddress = http://localhost:5248
 
-GET {{EstadoCuenta_Prueba_API_HostAddress}}/weatherforecast/
+### Obtener todos los estados de cuenta
+GET {{EstadoCuenta_Prueba_API_HostAddress}}/api/estadocuenta
 Accept: application/json
+
+### Obtener un estado de cuenta por ID
+GET {{EstadoCuenta_Prueba_API_HostAddress}}/api/estadocuenta/1
+Accept: application/json
+
 
 ###
