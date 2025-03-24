@@ -43,6 +43,7 @@ namespace Configuration.DependencyInjection
             services.AddTransient<IClienteBOL, ClienteBOL>();
             services.AddTransient<ITarjetaCreditoBOL, TarjetaCreditoBOL>();
             services.AddTransient<IEstadoCuentaBOL, EstadoCuentaBOL>();
+            services.AddTransient<ITransaccionesBOL, TransaccionesBOL>();
 
         }
 
@@ -52,7 +53,7 @@ namespace Configuration.DependencyInjection
             services.AddTransient<IClienteDAO, ClienteDAO>();
             services.AddTransient<ITarjetaCreditoDAO, TarjetaCreditoDAO>();
             services.AddTransient<IEstadoCuentaDAO, EstadoCuentaDAO>();
-
+            services.AddTransient<ITransaccionesDAO, TransaccionesDAO>();
         }
     }
 }

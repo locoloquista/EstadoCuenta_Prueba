@@ -17,6 +17,7 @@ namespace Configuration.AutoMapper
             CreateMap<ClienteRepository, ClienteDTO>();
             CreateMap<TarjetaCreditoRepository, TarjetaCreditoDTO>();
             CreateMap<EstadoCuentaRepository, EstadoCuentaDTO>();
+            CreateMap<TransaccionesRepository, TransaccionesDTO>();
         }
 
         private void MappingDtoToRepository()
@@ -24,6 +25,7 @@ namespace Configuration.AutoMapper
             CreateMap<ClienteDTO, ClienteRepository>();
             CreateMap<TarjetaCreditoDTO, TarjetaCreditoRepository>();
             CreateMap<EstadoCuentaDTO, EstadoCuentaRepository>();
+            CreateMap<TransaccionesDTO, TransaccionesRepository>();
         }
     }
 }
