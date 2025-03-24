@@ -1,12 +1,32 @@
 @EstadoCuenta_Prueba_API_HostAddress = http://localhost:5248
 
-### Obtener todos los estados de cuenta
-GET {{EstadoCuenta_Prueba_API_HostAddress}}/api/estadocuenta
+### Obtener informacion de todos los clientes
+GET {{EstadoCuenta_Prueba_API_HostAddress}}/api/GetAllCliente
 Accept: application/json
 
-### Obtener un estado de cuenta por ID
-GET {{EstadoCuenta_Prueba_API_HostAddress}}/api/estadocuenta/1
+### Obtener informacion de un cliente por su id
+GET {{EstadoCuenta_Prueba_API_HostAddress}}/api/GetClientebyId/1
 Accept: application/json
 
+### Obtener estado de cuenta de una tarjeta por su id
+GET {{EstadoCuenta_Prueba_API_HostAddress}}/api/GetEstadoCuentaByIdTarjeta/1
+Accept: application/json
 
-###
+### Obtener listado de tarjetas de un cliente por su id
+GET {{EstadoCuenta_Prueba_API_HostAddress}}/api/GetTartejaCreditoByClienteId/1
+Accept: application/json
+
+### Obtener listado de transacciones de una tarjeta por su id
+GET {{EstadoCuenta_Prueba_API_HostAddress}}/api/GetTransaccionesByIdTarjeta/1
+Accept: application/json
+
+### Crear una transaccion de una tarjeta por su id
+POST {{EstadoCuenta_Prueba_API_HostAddress}}/api/CreateTransaccionByIdTarjeta
+Accept: application/json
+{
+  "TarjetaId": "2",
+  "TipoTransaccion": "1",
+  "Fecha": "23/03/2025",
+  "Descripcion": "Por pago mensual",
+  "Monto": "458.25"
+}
