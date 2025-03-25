@@ -4,6 +4,13 @@
     ViewData["Title"] = "DetalleCliente";
 }
 
+@functions {
+    public string GetSaldoClass(decimal saldo)
+    {
+        return saldo < 0 ? "saldoNegativo" : string.Empty;
+    }
+}
+
 <div>
     <div class="container">
         <div class="row">
@@ -30,25 +37,19 @@
                 </div>
                 <div class="row">
                     <div class="col-sm-4">
-                        <p class="card-text">Límite de Crédito: $@tarjeta.LimiteCredito</p>
+                        <p class="card-text">Límite de Crédito: @tarjeta.LimiteCreditoFormateado</p>
                     </div>
                     <div class="col-sm-4">
-                        <p class="card-text">Saldo Actual: $@tarjeta.SaldoActual</p>
+                        <p class="card-text">Saldo Actual: @tarjeta.SaldoActualFormateado</p>
                     </div>
                     <div class="col-sm-4">
-                        <p class="card-text">Monto Disponible: $@tarjeta.MontoDisponible</p>
+                        <p class="card-text">Monto Disponible: <span class="@GetSaldoClass(@tarjeta.MontoDisponible)">@tarjeta.MontoDisponibleFormateado</span>
                     </div>
                 </div>
                 <br />
                 <div class="row">
                     <div class="col-sm-4">
-                        <button type="button" class="btn btn-success" data-toggle="modal" data-target="#transaccionesModal" >Ver Detalle de Transacciones</button>
-                    </div>
-                    <div class="col-sm-4">
-                        <button type="button" class="btn btn-danger" data-toggle="modal" data-target="#estadoCuentaModal" >Ver Estado de Cuenta</button>
-                    </div>
-                    <div class="col-sm-4">
-                        <button type="button" class="btn btn-danger" id="showModal" onclick="Confirm(@tarjeta.TarjetaId)">Ver Estado de Cuenta</button>
+                        @Html.ActionLink("Ver Estado de Cuenta", "EstadoCuentaCompleto", "EstadoCuenta", new { tarjetaId = @tarjeta.TarjetaId }, new { @class = "btn btn-success" })
                     </div>
                 </div>
 
@@ -57,103 +58,13 @@
     }
 </div>
 
-<!-- Button trigger modal -->
-<button type="button" class="btn btn-primary" data-toggle="modal" data-target="#estadoCuentaModal">
-    Launch demo modal
-</button>
-<!-- Modal para Ver Detalle de Transacciones -->
-<div class="modal fade" id="transaccionesModal" tabindex="-1" role="dialog" aria-labelledby="transaccionesModalLabel" aria-hidden="true">
-    <div class="modal-dialog" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="transaccionesModalLabel">Detalle de Transacciones</h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
-            </div>
-            <div class="modal-body">
-                <!-- Aquí se cargará el contenido de las transacciones -->
-                <div id="transaccionesContent"></div>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cerrar</button>
-            </div>
-        </div>
-    </div>
-</div>
 
+<style>
+    .saldoNegativo {
+        color: red;
+    }
+</style>
 
-
-<!-- Modal para Ver Estado de Cuenta -->
-<div class="modal fade" id="estadoCuentaModal" tabindex="-1" role="dialog" aria-labelledby="estadoCuentaModalLabel" aria-hidden="true">
-    <div class="modal-dialog" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="estadoCuentaModalLabel">Estado de Cuenta</h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
-            </div>
-            <div class="modal-body">
-                <!-- Aquí se cargará el contenido del estado de cuenta -->
-                <div id="estadoCuentaContent"></div>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cerrar</button>
-            </div>
-        </div>
-    </div>
-</div>
-
-
-
-@section Scripts{
-    <script>
-             $('#transaccionesModal').on('show.bs.modal', function (event) {
-            var button = $(event.relatedTarget);
-            var tarjetaId = button.data('tarjetaid');
-            var modal = $(this);
-            // Aquí puedes hacer una llamada AJAX para obtener los detalles de las transacciones
-            // y cargar el contenido en el modal
-            $.ajax({
-                url: '/Transacciones/ListadoTransacciones',
-                data: { tarjetaId: tarjetaId },
-                success: function (data) {
-                    modal.find('#transaccionesContent').html(data);
-                }
-            });
-        });
-
-        $('#estadoCuentaModal').on('show.bs.modal', function (event) {
-            var button = $(event.relatedTarget);
-            var tarjetaId = button.data('tarjetaid');
-            var modal = $(this);
-            // Aquí puedes hacer una llamada AJAX para obtener el estado de cuenta
-            // y cargar el contenido en el modal
-            $.ajax({
-                url: '/EstadoCuenta/DetalleEstadoCuenta',
-                data: { tarjetaId: tarjetaId },
-                success: function (data) {
-                    modal.find('#estadoCuentaContent').html(data);
-                }
-            });
-        });
-
-        function Confirm(tarjetaId) {
-            var modal = $('#estadoCuentaModal');
-            // Aquí puedes hacer una llamada AJAX para obtener el estado de cuenta
-            // y cargar el contenido en el modal
-            $.ajax({
-                url: '/EstadoCuenta/DetalleEstadoCuenta',
-                data: { tarjetaId: tarjetaId },
-                success: function (data) {
-                    modal.find('#estadoCuentaContent').html(data);
-                    modal.modal('show');
-                }
-            });
-        }
-    </script>
-}
 
 
 

@@ -1,0 +1,132 @@
+﻿@model ViewModels.EstadoCuentaCompletoViewModel
+
+@{
+    ViewData["Title"] = "EstadoCuenta";
+    int? idCliente = ViewBag.IdCliente;
+    int? tarjetaId = ViewBag.TarjetaId;
+}
+
+@functions {
+    public string GetSaldoClass(decimal saldo)
+    {
+        return saldo < 0 ? "saldoNegativo" : string.Empty;
+    }
+}
+
+<div class="container">
+    <div class="row">
+        <div class="col-sm-10">
+            <h5> Cliente: @Html.DisplayFor(model => model.EstadoCuenta.NombreCliente) - Número de Tarjeta: @Html.DisplayFor(model => model.EstadoCuenta.NumeroTarjeta)</h5>
+        </div>
+        <div class="col-sm-2 d-flex justify-content-end">
+            @Html.ActionLink("Volver al listado", "DetalleCliente", "Cliente", new { idCliente = @idCliente}, new { @class = "btn btn-outline-primary" })
+        </div>
+    </div>
+
+    <br />
+
+    <div class="row">
+        <div class="col-sm-4" style="text-align:left;">
+            Limite del Crédito: @Html.DisplayFor(model => model.EstadoCuenta.LimiteCreditoFormateado)
+        </div>
+        <div class="col-sm-4" style="text-align:center;">
+            Tasa de Interes: @Html.DisplayFor(model => model.EstadoCuenta.TasaInteresFormateada)
+        </div>
+        <div class="col-sm-4" style="text-align:right;">
+            Saldo Disponible: <span class="@GetSaldoClass(Model.EstadoCuenta.SaldoDisponible)">$@Html.DisplayFor(model => model.EstadoCuenta.SaldoDisponibleFormateado)</span>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-sm-4" style="text-align:left;">
+            Saldo Total: @Html.DisplayFor(model => model.EstadoCuenta.SaldoTotalFormateado)
+        </div>
+        <div class="col-sm-4" style="text-align:center;">
+            Compras del Mes Anterior: @Html.DisplayFor(model => model.EstadoCuenta.ComprasMesAnteriorFormateado)
+        </div>
+        <div class="col-sm-4" style="text-align:right;">
+            Compras del Mes Actual: @Html.DisplayFor(model => model.EstadoCuenta.ComprasMesActualFormateado)
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-sm-4" style="text-align:left;">
+            Interes Bonificable: @Html.DisplayFor(model => model.EstadoCuenta.InteresBonificableFormateado)
+        </div>
+        <div class="col-sm-4" style="text-align:center;">
+            Cuota Mínima: @Html.DisplayFor(model => model.EstadoCuenta.CuotaMinima)
+        </div>
+        <div class="col-sm-4" style="text-align:right;">
+            <strong>Pago Contado (Con Intereses): @Html.DisplayFor(model => model.EstadoCuenta.PagoContadoConInteresesFormateado)</strong>
+        </div>
+    </div>
+</div>
+
+<br />
+<div class="container">
+    <div class="row">
+        <div class="col-sm-9">
+            <h5>Tarjetas de Crédito</h5>
+        </div> 
+        <div class="col-sm-3 d-flex justify-content-end">
+            @Html.ActionLink("Exportar Estado de Cuenta", "ExportarEstadoCuenta", "EstadoCuenta", new { tarjetaId = @tarjetaId }, new { @class = "btn btn-outline-danger" })
+        </div>
+    </div>
+    
+    <hr />
+
+    <table class="table">
+        <thead>
+            <tr>
+                <th>
+                    @Html.DisplayNameFor(model => model.Transacciones[0].Fecha)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.Transacciones[0].TipoTransaccion)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.Transacciones[0].Descripcion)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.Transacciones[0].Monto)
+                </th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model.Transacciones)
+{
+    var rowClass = item.TipoTransaccion == "Pago" ? "pago" : item.TipoTransaccion == "Compra" ? "compra" : "";
+            <tr class="@rowClass">
+                <td>
+                    @Html.DisplayFor(modelItem => item.Fecha)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.TipoTransaccion)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Descripcion)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Monto)
+                </td>
+            </tr>
+}
+        </tbody>
+    </table>
+</div>
+
+<style>
+    .pago {
+        background-color: #79c755;
+        color: white;
+    }
+
+    .compra {
+        background-color: #c75555;
+        color: white;
+    }
+
+    .saldoNegativo {
+        color: red;
+    }
+</style>

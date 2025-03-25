@@ -14,5 +14,10 @@ namespace ViewModels
         public string Descripcion { get; set; }
         [Display(Name = "Monto de Transacción")]
         public decimal Monto { get; set; }
+
+        // Propiedades formateadas
+        public string FechaFormateada => Fecha.ToString("d");
+        public string MontoFormateado => Monto.ToString("C2");
+
     }
 }

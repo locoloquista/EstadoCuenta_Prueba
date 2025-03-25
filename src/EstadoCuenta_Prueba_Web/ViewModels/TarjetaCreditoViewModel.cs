@@ -14,5 +14,11 @@ namespace ViewModels
         public decimal SaldoActual { get; set; }
         [Display(Name = "Monto Disponible")]
         public decimal MontoDisponible { get; set; }
+
+
+        // Propiedades formateadas
+        public string LimiteCreditoFormateado => LimiteCredito.ToString("C2");
+        public string SaldoActualFormateado => SaldoActual.ToString("C2");
+        public string MontoDisponibleFormateado => MontoDisponible.ToString("C2");
     }
 }

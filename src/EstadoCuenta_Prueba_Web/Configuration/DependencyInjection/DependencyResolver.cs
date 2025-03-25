@@ -16,7 +16,6 @@ namespace Configuration.DependencyInjection
     {
         public static void ConfigureInfraestructure(this IServiceCollection services, IConfiguration configuration)
         {
-
             //Configuracion de AutoMapper
             services.AddAndConfigMapper();
 

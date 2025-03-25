@@ -4,6 +4,6 @@ namespace InterfaceAdapter.BussinesLogic
 {
     public interface IEstadoCuentaBOL
     {
-        public Task<EstadoCuentaViewModel> DetalleEstadoCuenta(int tarjetaId);
+        public Task<EstadoCuentaCompletoViewModel> EstadoCuentaCompleto(int tarjetaId);
     }
 }

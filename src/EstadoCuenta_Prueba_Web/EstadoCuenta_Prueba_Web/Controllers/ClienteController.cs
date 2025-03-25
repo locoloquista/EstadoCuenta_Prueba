@@ -23,6 +23,9 @@ namespace EstadoCuenta_Prueba_Web.Controllers
         public async Task<IActionResult> DetalleCliente(int idCliente)
         {
             InformacionClienteViewModel cliente = await _clienteBOL.InformacionCliente(idCliente);
+
+            HttpContext.Session.SetInt32("idCliente", idCliente);
+
             return View(cliente);
         }
     }
