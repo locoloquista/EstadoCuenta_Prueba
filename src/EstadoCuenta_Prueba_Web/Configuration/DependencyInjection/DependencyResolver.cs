@@ -1,12 +1,14 @@
 ﻿using BussinesLogic;
 using Configuration.AutoMapper;
-using Infraestructure.ConsumerServices;
 using Infraestructure.Mapping;
 using InterfaceAdapter.BussinesLogic;
 using InterfaceAdapter.ConsumerServices;
 using InterfaceAdapter.Mapping;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Services;
+using Services.Consumer;
+using Services.Consumer.ConsumerFactory;
 
 namespace Configuration.DependencyInjection
 {
@@ -14,33 +16,44 @@ namespace Configuration.DependencyInjection
     {
         public static void ConfigureInfraestructure(this IServiceCollection services, IConfiguration configuration)
         {
-            
+
             //Configuracion de AutoMapper
             services.AddAndConfigMapper();
 
+            // Registro de la configuración de ApiSettings
+            services.Configure<ApiSettings>(configuration.GetSection("ApiSettings"));
 
             //Inyecion de dependencias
-            services.AddTransient<IParser, Parser>();
+            services.AddScoped<IParser, Parser>();
 
         }
 
         public static void ConfigureBussinesLogic(this IServiceCollection services)
         {
             //Inyecion de dependencias
-            services.AddTransient<IClienteBOL, ClienteBOL>();
-            services.AddTransient<ITarjetaCreditoBOL, TarjetaCreditoBOL>();
-            services.AddTransient<IEstadoCuentaBOL, EstadoCuentaBOL>();
-            services.AddTransient<ITransaccionesBOL, TransaccionesBOL>();
+            services.AddScoped<IClienteBOL, ClienteBOL>();
+            services.AddScoped<ITarjetaCreditoBOL, TarjetaCreditoBOL>();
+            services.AddScoped<IEstadoCuentaBOL, EstadoCuentaBOL>();
+            services.AddScoped<ITransaccionesBOL, TransaccionesBOL>();
 
         }
 
-        public static void ConfigureConsumerServices(this IServiceCollection services)
+        public static void ConfigureConsumerServices(this IServiceCollection services, IConfiguration configuration)
         {
             //Inyecion de dependencias
-            services.AddTransient<IClienteServices, ClienteServices>();
-            services.AddTransient<ITarjetaCreditoServices, TarjetaCreditoServices>();
-            services.AddTransient<IEstadoCuentaServices, EstadoCuentaServices>();
-            services.AddTransient<ITransaccionesServices, TransaccionesServices>();
+            services.AddScoped<IClienteServices, ClienteServices>();
+            services.AddScoped<ITarjetaCreditoServices, TarjetaCreditoServices>();
+            services.AddScoped<IEstadoCuentaServices, EstadoCuentaServices>();
+            services.AddScoped<ITransaccionesServices, TransaccionesServices>();
+            services.AddScoped<IConsumerFactory, ConsumerFactory>();
+
+            services.AddScoped<IRestApiConsumer>(provider =>
+            {
+                var configuration = provider.GetRequiredService<IConfiguration>();
+                var stringValue = configuration.GetValue<string>("ApiSettings:EstadoCuentaApi_url");
+                return new RestApiConsumer(stringValue);
+            });
+
         }
     }
 }

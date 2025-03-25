@@ -13,6 +13,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "InterfaceAdapter", "Interfa
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BussinesLogic", "BussinesLogic\BussinesLogic.csproj", "{79F64B06-4378-45BB-9049-6149B8330F62}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ViewModels", "ViewModels\ViewModels.csproj", "{7D0A0EBA-29C0-43B4-AC56-FBBF0CDD5306}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Services", "Services\Services.csproj", "{B7F95261-C50C-40F8-BEA3-EE32F37C9E66}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -39,6 +43,14 @@ Global
 		{79F64B06-4378-45BB-9049-6149B8330F62}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{79F64B06-4378-45BB-9049-6149B8330F62}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{79F64B06-4378-45BB-9049-6149B8330F62}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7D0A0EBA-29C0-43B4-AC56-FBBF0CDD5306}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7D0A0EBA-29C0-43B4-AC56-FBBF0CDD5306}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7D0A0EBA-29C0-43B4-AC56-FBBF0CDD5306}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7D0A0EBA-29C0-43B4-AC56-FBBF0CDD5306}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B7F95261-C50C-40F8-BEA3-EE32F37C9E66}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B7F95261-C50C-40F8-BEA3-EE32F37C9E66}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B7F95261-C50C-40F8-BEA3-EE32F37C9E66}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B7F95261-C50C-40F8-BEA3-EE32F37C9E66}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -1,12 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using InterfaceAdapter.DTO;
 
 namespace InterfaceAdapter.ConsumerServices
 {
     public interface ITarjetaCreditoServices
     {
+        Task<List<TarjetaCreditoDTO>> GetTartejaCreditoByClienteId(int idCliente);
     }
 }

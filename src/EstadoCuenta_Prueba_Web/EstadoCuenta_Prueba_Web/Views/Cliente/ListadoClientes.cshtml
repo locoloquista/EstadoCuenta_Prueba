@@ -1,0 +1,43 @@
+﻿@model IEnumerable<ViewModels.ClienteViewModel>
+
+@{
+    ViewData["Title"] = "ListadoClientes";
+}
+
+<h1>Clientes</h1>
+
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>
+                @Html.DisplayNameFor(model => model.ClienteId)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.NombreCompleto)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.NumeroTarjetasActivas)
+            </th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+@foreach (var item in Model) {
+        <tr>
+            <td>
+                @Html.DisplayFor(modelItem => item.ClienteId)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.NombreCompleto)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.NumeroTarjetasActivas)
+            </td>
+            <td>
+                    @Html.ActionLink("Ver Tarjetas Asociadas", "DetalleCliente", new { idCliente = item.ClienteId })
+            </td>
+        </tr>
+}
+    </tbody>
+</table>

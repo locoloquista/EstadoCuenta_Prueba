@@ -1,12 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using InterfaceAdapter.DTO;
 
 namespace InterfaceAdapter.ConsumerServices
 {
     public interface IClienteServices
     {
+        Task<List<ClienteDTO>> GetAllCliente();
+        Task<ClienteDTO> GetClientebyId(int idCliente);
     }
 }

@@ -1,12 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using InterfaceAdapter.DTO;
 
 namespace InterfaceAdapter.ConsumerServices
 {
     public interface IEstadoCuentaServices
     {
+        public Task<EstadoCuentaDTO> DetalleEstadoCuenta(int tarjetaId);
     }
 }

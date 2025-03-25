@@ -1,13 +1,29 @@
 ﻿using InterfaceAdapter.BussinesLogic;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using InterfaceAdapter.ConsumerServices;
+using InterfaceAdapter.DTO;
+using InterfaceAdapter.Mapping;
+using ViewModels;
 
 namespace BussinesLogic
 {
     public class TransaccionesBOL : ITransaccionesBOL
     {
+        private readonly IParser _parser;
+        private readonly ITransaccionesServices _transaccionesServices;
+
+        public TransaccionesBOL(IParser parser, ITransaccionesServices transaccionesServices)
+        {
+            _parser = parser;
+            _transaccionesServices = transaccionesServices;
+        }
+
+        public async Task<List<TransaccionesViewModel>> GetTransacciones(int tarjetaId)
+        {
+            List<TransaccionDTO> transacciones = await _transaccionesServices.GetTransacciones(tarjetaId);
+
+            List<TransaccionesViewModel> transaccionesViewModels = _parser.Parse<List<TransaccionesViewModel>, List<TransaccionDTO>>(transacciones);
+
+            return transaccionesViewModels;
+        }
     }
 }

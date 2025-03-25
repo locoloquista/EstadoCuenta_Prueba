@@ -1,12 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using ViewModels;
 
 namespace InterfaceAdapter.BussinesLogic
 {
     public interface IClienteBOL
     {
+        Task<List<ClienteViewModel>> GetAllCliente();
+        Task<InformacionClienteViewModel> InformacionCliente(int idCliente);
     }
 }

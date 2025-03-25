@@ -1,7 +1,16 @@
+using Configuration.DependencyInjection;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
+
+//Servicios declarados en Configuration.DI.DependencyResolver
+var configuration = builder.Configuration;
+builder.Services.ConfigureInfraestructure(configuration);
+builder.Services.ConfigureBussinesLogic();
+builder.Services.ConfigureConsumerServices(configuration);
+
 
 var app = builder.Build();
 
@@ -22,6 +31,6 @@ app.UseAuthorization();
 
 app.MapControllerRoute(
     name: "default",
-    pattern: "{controller=Home}/{action=Index}/{id?}");
+    pattern: "{controller=Cliente}/{action=ListadoClientes}/{id?}");
 
 app.Run();
