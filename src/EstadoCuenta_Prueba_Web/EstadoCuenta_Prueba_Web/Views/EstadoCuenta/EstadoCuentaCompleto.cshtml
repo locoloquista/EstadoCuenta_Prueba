@@ -98,7 +98,7 @@
     var rowClass = item.TipoTransaccion == "Pago" ? "pago" : item.TipoTransaccion == "Compra" ? "compra" : "";
             <tr class="@rowClass">
                 <td>
-                    @Html.DisplayFor(modelItem => item.Fecha)
+                    @Html.DisplayFor(modelItem => item.FechaFormateada)
                 </td>
                 <td>
                     @Html.DisplayFor(modelItem => item.TipoTransaccion)
@@ -107,7 +107,7 @@
                     @Html.DisplayFor(modelItem => item.Descripcion)
                 </td>
                 <td>
-                    @Html.DisplayFor(modelItem => item.Monto)
+                    @Html.DisplayFor(modelItem => item.MontoFormateado)
                 </td>
             </tr>
 }
