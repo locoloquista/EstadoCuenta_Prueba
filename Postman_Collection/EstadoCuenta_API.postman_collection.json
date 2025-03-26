@@ -1,0 +1,191 @@
+{
+	"info": {
+		"_postman_id": "25258b96-5995-415c-87cb-bb612a4114f9",
+		"name": "EstadoCuenta_API",
+		"description": "Colección de solicitudes para probar el servicio API.",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "25183366"
+	},
+	"item": [
+		{
+			"name": "ObtenerListadoClientes",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "https://localhost:7160/api/Cliente/GetAllCliente",
+					"protocol": "https",
+					"host": [
+						"localhost"
+					],
+					"port": "7160",
+					"path": [
+						"api",
+						"Cliente",
+						"GetAllCliente"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "ObtenerClientePorId",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "https://localhost:7160/api/Cliente/GetClientebyId?idCliente=2",
+					"protocol": "https",
+					"host": [
+						"localhost"
+					],
+					"port": "7160",
+					"path": [
+						"api",
+						"Cliente",
+						"GetClientebyId"
+					],
+					"query": [
+						{
+							"key": "idCliente",
+							"value": "2"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "ObtenerEstadoCuentaPorTarjetaCredito",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "https://localhost:7160/api/EstadoCuenta/GetEstadoCuentaByIdTarjeta?IdTarjetaCredito=5",
+					"protocol": "https",
+					"host": [
+						"localhost"
+					],
+					"port": "7160",
+					"path": [
+						"api",
+						"EstadoCuenta",
+						"GetEstadoCuentaByIdTarjeta"
+					],
+					"query": [
+						{
+							"key": "IdTarjetaCredito",
+							"value": "5"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "ObtenerTarjetasCreditoPorCliente",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "https://localhost:7160/api/TarjetaCredito/GetTartejaCreditoByClienteId?IdCliente=3",
+					"protocol": "https",
+					"host": [
+						"localhost"
+					],
+					"port": "7160",
+					"path": [
+						"api",
+						"TarjetaCredito",
+						"GetTartejaCreditoByClienteId"
+					],
+					"query": [
+						{
+							"key": "IdCliente",
+							"value": "3"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "ObtenerTransaccionesPorTarjeta",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "https://localhost:7160/api/Transacciones/GetTransaccionesByIdTarjeta?idTarjeta=6",
+					"protocol": "https",
+					"host": [
+						"localhost"
+					],
+					"port": "7160",
+					"path": [
+						"api",
+						"Transacciones",
+						"GetTransaccionesByIdTarjeta"
+					],
+					"query": [
+						{
+							"key": "idTarjeta",
+							"value": "6"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "ObtenerTiposTransacciones",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "https://localhost:7160/api/Transacciones/GetTiposTransacciones",
+					"protocol": "https",
+					"host": [
+						"localhost"
+					],
+					"port": "7160",
+					"path": [
+						"api",
+						"Transacciones",
+						"GetTiposTransacciones"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "CrearTransaccionATarjetaCredito",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"tarjetaId\": 2,\r\n  \"tipoTransaccion\": \"2\",\r\n  \"fecha\": \"2025-03-26\",\r\n  \"descripcion\": \"Para prueba de API\",\r\n  \"monto\": 10\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "https://localhost:7160/api/Transacciones/CreateTransaccionByIdTarjeta",
+					"protocol": "https",
+					"host": [
+						"localhost"
+					],
+					"port": "7160",
+					"path": [
+						"api",
+						"Transacciones",
+						"CreateTransaccionByIdTarjeta"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}
