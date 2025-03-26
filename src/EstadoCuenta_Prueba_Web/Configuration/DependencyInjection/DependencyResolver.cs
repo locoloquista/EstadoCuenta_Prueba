@@ -1,9 +1,11 @@
 ﻿using BussinesLogic;
 using Configuration.AutoMapper;
 using Infraestructure.Mapping;
+using Infraestructure.PdfGeneration;
 using InterfaceAdapter.BussinesLogic;
 using InterfaceAdapter.ConsumerServices;
 using InterfaceAdapter.Mapping;
+using InterfaceAdapter.PdfGeneration;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Services;
@@ -45,14 +47,14 @@ namespace Configuration.DependencyInjection
             services.AddScoped<IEstadoCuentaServices, EstadoCuentaServices>();
             services.AddScoped<ITransaccionesServices, TransaccionesServices>();
             services.AddScoped<IConsumerFactory, ConsumerFactory>();
-
             services.AddScoped<IRestApiConsumer>(provider =>
             {
                 var configuration = provider.GetRequiredService<IConfiguration>();
                 var stringValue = configuration.GetValue<string>("ApiSettings:EstadoCuentaApi_url");
                 return new RestApiConsumer(stringValue);
             });
-
+            services.AddTransient<IPdfGeneratorServices, PdfGeneratorServices>();
+            services.AddHttpContextAccessor();
         }
     }
 }

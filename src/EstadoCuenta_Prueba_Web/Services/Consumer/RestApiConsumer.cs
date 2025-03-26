@@ -35,7 +35,7 @@ namespace Services.Consumer
 
             if (restResponse.ErrorException != null)
             {
-                throw new Exception($"Error: {restResponse.ErrorMessage}");
+                return new TResponse();
             }
 
             return restResponse.Data;

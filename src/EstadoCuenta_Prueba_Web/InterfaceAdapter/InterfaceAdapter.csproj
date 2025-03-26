@@ -10,8 +10,4 @@
     <ProjectReference Include="..\ViewModels\ViewModels.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="PdfGeneration\" />
-  </ItemGroup>
-
 </Project>

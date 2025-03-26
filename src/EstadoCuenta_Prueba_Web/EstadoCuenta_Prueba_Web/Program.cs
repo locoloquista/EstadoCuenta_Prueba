@@ -1,9 +1,13 @@
 using Configuration.DependencyInjection;
+using Rotativa.AspNetCore;
+using InterfaceAdapter.PdfGeneration;
+using Infraestructure.PdfGeneration;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
+// Configura Rotativa
 builder.Services.AddControllersWithViews();
+builder.Services.AddRazorPages();
 
 // Agregar servicios de sesión y caché distribuida
 builder.Services.AddDistributedMemoryCache();
@@ -19,6 +23,7 @@ var configuration = builder.Configuration;
 builder.Services.ConfigureInfraestructure(configuration);
 builder.Services.ConfigureBussinesLogic();
 builder.Services.ConfigureConsumerServices(configuration);
+
 
 var app = builder.Build();
 
@@ -42,4 +47,8 @@ app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Cliente}/{action=ListadoClientes}/{id?}");
 
+// Configura Rotativa
+RotativaConfiguration.Setup(app.Environment.WebRootPath, "Rotativa");
+
 app.Run();
+

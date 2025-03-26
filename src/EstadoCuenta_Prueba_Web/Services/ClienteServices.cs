@@ -23,7 +23,7 @@ namespace Services
             
             if (result.Items == null)
             {
-                throw new Exception("Error al obtener los clientes");
+                return new List<ClienteDTO>();
             }
             return result.Items;
         }
@@ -36,7 +36,7 @@ namespace Services
 
             if (result.Item == null)
             {
-                throw new Exception("Error al obtener los clientes");
+                return new ClienteDTO();
             }
 
             return result.Item;

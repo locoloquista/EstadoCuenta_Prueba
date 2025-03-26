@@ -26,7 +26,7 @@ namespace Services
             
             if (result.Items == null)
             {
-                throw new Exception("Error al obtener los clientes");
+                return new List<TarjetaCreditoDTO>();
             }
 
             return result.Items;

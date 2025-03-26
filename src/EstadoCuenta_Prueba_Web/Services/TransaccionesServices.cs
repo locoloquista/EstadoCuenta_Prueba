@@ -23,7 +23,7 @@ namespace Services
 
             if (result.Items == null)
             {
-                throw new Exception("Error al obtener las transacciones");
+                return new List<TransaccionDTO>();
             }
 
             return result.Items;

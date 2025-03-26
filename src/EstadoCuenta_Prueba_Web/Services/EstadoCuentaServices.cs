@@ -23,7 +23,7 @@ namespace Services
 
             if (result.Item == null)
             {
-                throw new Exception("Error al obtener las transacciones");
+                return new EstadoCuentaDTO();
             }
 
             return result.Item;
