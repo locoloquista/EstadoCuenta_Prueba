@@ -1,8 +1,6 @@
 ﻿using InterfaceAdapter.BussinesLogic;
 using InterfaceAdapter.PdfGeneration;
 using Microsoft.AspNetCore.Mvc;
-using Rotativa.AspNetCore;
-using ViewModels;
 
 namespace EstadoCuenta_Prueba_Web.Controllers
 {

@@ -1,4 +1,5 @@
 ﻿using InterfaceAdapter.DTO.BussinesLogic;
+using InterfaceAdapter.DTO.Response;
 
 namespace InterfaceAdapter.BussinesLogic
 {
@@ -6,5 +7,6 @@ namespace InterfaceAdapter.BussinesLogic
     {
         Task<List<TransaccionesDTO>> GetTransaccionesByIdTarjeta(int idTarjeta);
         Task<List<TransaccionesDTO>> CreateTransaccionByIdTarjeta(TransaccionesDTO transaccion);
+        Task<List<TiposTransaccionesDTO>> GetTiposTransacciones();
     }
 }

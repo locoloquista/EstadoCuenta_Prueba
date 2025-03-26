@@ -4,6 +4,8 @@ namespace InterfaceAdapter.ConsumerServices
 {
     public interface ITransaccionesServices
     {
-        public Task<List<TransaccionDTO>> GetTransacciones(int tarjetaId);
+        Task<List<TransaccionDTO>> GetTransacciones(int tarjetaId);
+        Task<List<TiposTransaccionesDTO>> GetTiposTransacciones();
+        Task<List<TransaccionDTO>> AgregarCompraPagoByTarjeta(TransaccionDTO model);
     }
 }

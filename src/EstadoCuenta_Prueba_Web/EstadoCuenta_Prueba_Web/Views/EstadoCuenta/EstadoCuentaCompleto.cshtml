@@ -33,7 +33,7 @@
             Tasa de Interes: @Html.DisplayFor(model => model.EstadoCuenta.TasaInteresFormateada)
         </div>
         <div class="col-sm-4" style="text-align:right;">
-            Saldo Disponible: <span class="@GetSaldoClass(Model.EstadoCuenta.SaldoDisponible)">$@Html.DisplayFor(model => model.EstadoCuenta.SaldoDisponibleFormateado)</span>
+            Saldo Disponible: <span class="@GetSaldoClass(Model.EstadoCuenta.SaldoDisponible)">@Html.DisplayFor(model => model.EstadoCuenta.SaldoDisponibleFormateado)</span>
         </div>
     </div>
 
@@ -54,7 +54,7 @@
             Interes Bonificable: @Html.DisplayFor(model => model.EstadoCuenta.InteresBonificableFormateado)
         </div>
         <div class="col-sm-4" style="text-align:center;">
-            Cuota Mínima: @Html.DisplayFor(model => model.EstadoCuenta.CuotaMinima)
+            Cuota Mínima: @Html.DisplayFor(model => model.EstadoCuenta.CuotaMinimaFormateado)
         </div>
         <div class="col-sm-4" style="text-align:right;">
             <strong>Pago Contado (Con Intereses): @Html.DisplayFor(model => model.EstadoCuenta.PagoContadoConInteresesFormateado)</strong>
@@ -66,7 +66,7 @@
 <div class="container">
     <div class="row">
         <div class="col-sm-9">
-            <h5>Tarjetas de Crédito</h5>
+            <h5>Transacciones del Mes</h5>
         </div> 
         <div class="col-sm-3 d-flex justify-content-end">
             @Html.ActionLink("Exportar Estado de Cuenta", "ExportarEstadoCuenta", "EstadoCuenta", new { tarjetaId = @tarjetaId }, new { @class = "btn btn-outline-danger" })
@@ -117,12 +117,12 @@
 
 <style>
     .pago {
-        background-color: #79c755;
+        background-color: #9cd681;
         color: white;
     }
 
     .compra {
-        background-color: #c75555;
+        background-color: #d68181;
         color: white;
     }
 

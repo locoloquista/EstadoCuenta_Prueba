@@ -4,6 +4,8 @@ namespace InterfaceAdapter.BussinesLogic
 {
     public interface ITransaccionesBOL
     {
-        public Task<List<TransaccionesViewModel>> GetTransacciones(int tarjetaId);
+        Task<List<TransaccionesViewModel>> GetTransacciones(int tarjetaId);
+        Task<List<TiposTransaccionesViewModel>> GetTiposTransacciones();
+        Task<List<TransaccionesViewModel>> AgregarCompraPagoByTarjeta(TransaccionesViewModel model);
     }
 }

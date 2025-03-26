@@ -17,6 +17,7 @@ namespace Configuration.AutoMapper
             CreateMap<TarjetaCreditoViewModel, TarjetaCreditoDTO>();
             CreateMap<TransaccionesViewModel, TransaccionDTO>();
             CreateMap<EstadoCuentaViewModel, EstadoCuentaDTO>();
+            CreateMap<TiposTransaccionesViewModel, TiposTransaccionesDTO>();
         }
 
         private void MappingDtoToViewModel()
@@ -36,6 +37,7 @@ namespace Configuration.AutoMapper
                 .ForMember(dest => dest.CuotaMinimaFormateado, opt => opt.Ignore())
                 .ForMember(dest => dest.PagoContadoConInteresesFormateado, opt => opt.Ignore())
                 .ForMember(dest => dest.TasaInteresFormateada, opt => opt.Ignore());
+            CreateMap<TiposTransaccionesDTO, TiposTransaccionesViewModel>();
         }
     }
 }

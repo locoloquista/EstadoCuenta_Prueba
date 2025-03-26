@@ -1,0 +1,60 @@
+﻿@model ViewModels.TransaccionesViewModel
+@{
+    ViewBag.Title = "Agregar Nueva Transacción - Tarjeta ID: ";
+    var tarjetaId = ViewBag.TarjetaId;
+    var idCliente = ViewBag.idCliente;
+    var tiposTransacciones = ViewBag.TiposTransacciones as List<SelectListItem>;
+}
+
+<div class="container mt-5">
+    <div class="row">
+        <div class="col-sm-9">
+            <h2>@ViewBag.Title @tarjetaId</h2>
+        </div>
+        <div class="col-sm-3 d-flex justify-content-end">
+            @Html.ActionLink("Volver al listado", "DetalleCliente", "Cliente", new { idCliente = @idCliente }, new { @class = "btn btn-outline-primary" })
+        </div>
+    </div>
+    
+    
+    <form asp-action="AgregarCompraPagoByTarjeta" method="post" class="needs-validation" novalidate>
+        <div class="mb-3">
+            <label asp-for="TarjetaId" class="form-label"></label>
+            <input asp-for="TarjetaId" class="form-control" value="@tarjetaId" readonly />
+        </div>
+        <div class="mb-3">
+            <label asp-for="TipoTransaccion" class="form-label"></label>
+            <select asp-for="TipoTransaccion" class="form-select" asp-items="tiposTransacciones" id="tipoTransaccionSelect">
+                <option value="">Seleccione un tipo de transacción</option>
+            </select>
+            <span asp-validation-for="TipoTransaccion" class="text-danger"></span>
+        </div>
+        <div class="mb-3">
+            <label asp-for="Fecha" class="form-label"></label>
+            <input asp-for="Fecha" class="form-control" value="@DateTime.Now.ToString("yyyy-MM-ddTHH:mm")" readonly />
+            <span asp-validation-for="Fecha" class="text-danger"></span>
+        </div>
+        <div class="mb-3">
+            <label asp-for="Descripcion" class="form-label"></label>
+            <input asp-for="Descripcion" class="form-control" />
+            <span asp-validation-for="Descripcion" class="text-danger"></span>
+        </div>
+        <div class="mb-3">
+            <label asp-for="Monto" class="form-label"></label>
+            <input asp-for="Monto" class="form-control" />
+            <span asp-validation-for="Monto" class="text-danger"></span>
+        </div>
+        <input type="hidden" id="tipoTransaccionHidden" name="TipoTransaccion" />
+        <button type="submit" class="btn btn-success">Agregar Transacción</button>
+    </form>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        document.getElementById('tipoTransaccionSelect').addEventListener('change', function () {
+            var selectedValue = this.value;
+            document.getElementById('tipoTransaccionHidden').value = selectedValue.toString();
+        });
+    </script>
+}

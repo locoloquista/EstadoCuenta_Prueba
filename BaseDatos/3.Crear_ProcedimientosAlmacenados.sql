@@ -153,6 +153,38 @@ GO
 
 
 
+-- ============================================
+-- Procedimiento para obtener los tipos de transacciones
+-- ============================================
+-- Verificar si el procedimiento ya existe y eliminarlo
+IF OBJECT_ID('ObtenerTiposTransacciones', 'P') IS NOT NULL
+    DROP PROCEDURE ObtenerTiposTransacciones;
+GO
+-- Crear el procedimiento almacenado
+CREATE PROCEDURE ObtenerTiposTransacciones
+AS
+BEGIN
+    BEGIN TRY
+        -- Seleccionar los tipos de transacciones
+        SELECT 
+            id AS TransaccionId,
+           nombre_tipo AS TipoTransaccion
+        FROM tipos_transaccion 
+        WHERE activo = 1;
+    END TRY
+    BEGIN CATCH
+        -- Registrar el error en la bitácora
+        DECLARE @ErrorMessage nvarchar(MAX) = ERROR_MESSAGE();
+        EXEC RegistrarBitacora 'tipoTransacciones/ObtenerTiposTransacciones', 'error', 0, 'Sistema', @ErrorMessage;
+    END CATCH;
+END;
+GO
+
+
+
+
+
+
 
 -- ============================================
 -- Procedimiento para obtener informacion de clientes por ID
@@ -375,7 +407,7 @@ BEGIN
         -- Confirmar la transacción
         COMMIT TRANSACTION;
 
-		return 1;
+        RETURN 1;
     END TRY
     BEGIN CATCH
         -- Revertir la transacción en caso de error
@@ -391,7 +423,7 @@ BEGIN
             @Usuario = @Usuario, 
             @Datos = @ErrorMensaje;
 
-		return 0;
+        RETURN 0;
     END CATCH;
 END;
 GO

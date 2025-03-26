@@ -51,6 +51,9 @@
                     <div class="col-sm-4">
                         @Html.ActionLink("Ver Estado de Cuenta", "EstadoCuentaCompleto", "EstadoCuenta", new { tarjetaId = @tarjeta.TarjetaId }, new { @class = "btn btn-success" })
                     </div>
+                    <div class="col-sm-4">
+                        @Html.ActionLink("Agregar Compra o Pago", "AgregarCompraPagoByTarjeta", "Transacciones", new { tarjetaId = @tarjeta.TarjetaId }, new { @class = "btn btn-primary" })
+                    </div>
                 </div>
 
             </div>

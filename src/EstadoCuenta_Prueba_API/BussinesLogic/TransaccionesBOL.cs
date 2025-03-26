@@ -20,10 +20,14 @@ namespace BussinesLogic
 
         public async Task<List<TransaccionesDTO>> CreateTransaccionByIdTarjeta(TransaccionesDTO transaccion)
         {
-            await _transaccionesDAO.CreateTransaccionByIdTarjeta(transaccion);
+            int result = await _transaccionesDAO.CreateTransaccionByIdTarjeta(transaccion);
 
             return await _transaccionesDAO.GetTransaccionesByIdTarjeta(transaccion.TarjetaId);
         }
 
+        public async Task<List<TiposTransaccionesDTO>> GetTiposTransacciones()
+        {
+            return await _transaccionesDAO.GetTiposTransacciones();
+        }
     }
 }

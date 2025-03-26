@@ -1,27 +1,31 @@
 @EstadoCuenta_Prueba_API_HostAddress = http://localhost:5248
 
 ### Obtener informacion de todos los clientes
-GET {{EstadoCuenta_Prueba_API_HostAddress}}/api/GetAllCliente
+GET {{EstadoCuenta_Prueba_API_HostAddress}}/api/Cliente/GetAllCliente
 Accept: application/json
 
 ### Obtener informacion de un cliente por su id
-GET {{EstadoCuenta_Prueba_API_HostAddress}}/api/GetClientebyId/1
+GET {{EstadoCuenta_Prueba_API_HostAddress}}/api/Cliente/GetClientebyId?idCliente=2
 Accept: application/json
 
 ### Obtener estado de cuenta de una tarjeta por su id
-GET {{EstadoCuenta_Prueba_API_HostAddress}}/api/GetEstadoCuentaByIdTarjeta/1
+GET {{EstadoCuenta_Prueba_API_HostAddress}}/api/EstadoCuenta/GetEstadoCuentaByIdTarjeta?IdTarjetaCredito=1
 Accept: application/json
 
 ### Obtener listado de tarjetas de un cliente por su id
-GET {{EstadoCuenta_Prueba_API_HostAddress}}/api/GetTartejaCreditoByClienteId/1
+GET {{EstadoCuenta_Prueba_API_HostAddress}}/api/TarjetaCredito/GetTartejaCreditoByClienteId/?IdCliente=1
 Accept: application/json
 
 ### Obtener listado de transacciones de una tarjeta por su id
-GET {{EstadoCuenta_Prueba_API_HostAddress}}/api/GetTransaccionesByIdTarjeta/1
+GET {{EstadoCuenta_Prueba_API_HostAddress}}/api/Transacciones/GetTransaccionesByIdTarjeta?idTarjeta=1
+Accept: application/json
+
+### Obtener listado de transacciones de una tarjeta por su id
+GET {{EstadoCuenta_Prueba_API_HostAddress}}/api/Transacciones/GetTiposTransacciones
 Accept: application/json
 
 ### Crear una transaccion de una tarjeta por su id
-POST {{EstadoCuenta_Prueba_API_HostAddress}}/api/CreateTransaccionByIdTarjeta
+POST {{EstadoCuenta_Prueba_API_HostAddress}}/api/Transacciones/CreateTransaccionByIdTarjeta
 Accept: application/json
 {
   "TarjetaId": "2",

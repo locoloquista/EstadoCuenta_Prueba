@@ -35,6 +35,25 @@ namespace EstadoCuenta_Prueba_API.Controllers
             return response;
         }
 
+        [HttpGet("GetTiposTransacciones")]
+        public async Task<ResponseListMessage<TiposTransaccionesDTO>> GetTiposTransacciones()
+        {
+            ResponseListMessage<TiposTransaccionesDTO> response;
+
+            try
+            {
+                var result = await _transaccionesBOL.GetTiposTransacciones();
+
+                response = new ResponseListMessage<TiposTransaccionesDTO>("200: Success", true, result);
+            }
+            catch (Exception ex)
+            {
+                response = new ResponseListMessage<TiposTransaccionesDTO>("500: Error " + ex.Message, false, new List<TiposTransaccionesDTO>());
+            }
+
+            return response;
+        }
+
         [HttpPost("CreateTransaccionByIdTarjeta")]
         public async Task<ResponseListMessage<TransaccionesDTO>> CreateTransaccionByIdTarjeta(TransaccionesDTO transaccion)
         {

@@ -45,9 +45,9 @@ namespace Infrastructure.DataBase.DataAccess
                     new SqlParameter("@TarjetaId", SqlDbType.BigInt) { Value = Convert.ToInt32(transaccion.TarjetaId) },
                     new SqlParameter("@FechaTransaccion", SqlDbType.Date) { Value = transaccion.Fecha },
                     new SqlParameter("@Descripcion", SqlDbType.NVarChar, 255) { Value = transaccion.Descripcion },
-                    new SqlParameter("@Monto", SqlDbType.Decimal) { Value = transaccion.Descripcion },
+                    new SqlParameter("@Monto", SqlDbType.Decimal) { Value = transaccion.Monto },
                     new SqlParameter("@TipoTransaccionId", SqlDbType.BigInt) { Value = Convert.ToInt32(transaccion.TipoTransaccion) },
-                    new SqlParameter("@Usuario", SqlDbType.Decimal) { Value = "UsuarioWeb" }
+                    new SqlParameter("@Usuario", SqlDbType.NVarChar, 255) { Value = "UsuarioWeb" }
                 };
 
                 var result = await _unitOfWork.ExecuteStoredProcedureAsync<int>("AgregarTransaccion", parameters);
@@ -57,6 +57,19 @@ namespace Infrastructure.DataBase.DataAccess
             {
                 // Manejar la excepción según sea necesario
                 return await Task.FromResult(0);
+            }
+        }
+
+        public async Task<List<TiposTransaccionesDTO>> GetTiposTransacciones()
+        {
+            try
+            {
+                var result = await _unitOfWork.ExecuteStoredProcedureAsyncList<TiposTransaccionesRepository>("ObtenerTiposTransacciones");
+                return _parser.Parse<List<TiposTransaccionesDTO>, List<TiposTransaccionesRepository>>((List<TiposTransaccionesRepository>)result);
+            }
+            catch (Exception ex)
+            {
+                return await Task.FromResult(new List<TiposTransaccionesDTO>());
             }
         }
     }

@@ -23,22 +23,28 @@ namespace Infrastructure.DataBase.DBContext
         {
             T result = default;
 
-            using (var command = new SqlCommand(storedProcedure, _connection))
+            try
             {
-                command.CommandType = CommandType.StoredProcedure;
-                command.Parameters.AddRange(parameters);
-
-                _connection.Open();
-                using (var reader = await command.ExecuteReaderAsync())
+                using (var command = new SqlCommand(storedProcedure, _connection))
                 {
-                    if (await reader.ReadAsync())
+                    command.CommandType = CommandType.StoredProcedure;
+                    command.Parameters.AddRange(parameters);
+
+                    _connection.Open();
+                    using (var reader = await command.ExecuteReaderAsync())
                     {
-                        result = MapReaderToEntity<T>(reader);
+                        if (await reader.ReadAsync())
+                        {
+                            result = MapReaderToEntity<T>(reader);
+                        }
                     }
+                    _connection.Close();
                 }
+            }
+            catch(Exception ex)
+            {
                 _connection.Close();
             }
-
             return result;
         }
 
@@ -46,23 +52,29 @@ namespace Infrastructure.DataBase.DBContext
         {
             var result = new List<T>();
 
-            using (var command = new SqlCommand(storedProcedure, _connection))
+            try
             {
-                command.CommandType = CommandType.StoredProcedure;
-                command.Parameters.AddRange(parameters);
-
-                _connection.Open();
-                using (var reader = await command.ExecuteReaderAsync())
+                using (var command = new SqlCommand(storedProcedure, _connection))
                 {
-                    while (await reader.ReadAsync())
+                    command.CommandType = CommandType.StoredProcedure;
+                    command.Parameters.AddRange(parameters);
+
+                    _connection.Open();
+                    using (var reader = await command.ExecuteReaderAsync())
                     {
-                        // Assuming you have a method to map the data reader to your entity
-                        result.Add(MapReaderToEntity<T>(reader));
+                        while (await reader.ReadAsync())
+                        {
+                            // Assuming you have a method to map the data reader to your entity
+                            result.Add(MapReaderToEntity<T>(reader));
+                        }
                     }
+                    _connection.Close();
                 }
+            }
+            catch(Exception ex)
+            {
                 _connection.Close();
             }
-
             return result;
         }
         private T MapReaderToEntity<T>(SqlDataReader reader)
