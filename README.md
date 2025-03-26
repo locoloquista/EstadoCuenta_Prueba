@@ -51,7 +51,7 @@ La arquitectura de la solución API se encuentra representada en el siguiente di
 ### EstadoCuenta_Prueba_Web
 La arquitectura de la solución Web se encuentra representada en el siguiente diagrama:
 
-![Arquitectura Web](Documentacion/Arquitectura/Arquitectura_EstadoCuenta_Web.png)
+![Arquitectura Web](Documentacion/Arquitectura/Arquitectura_EstadoCuenta_WEB.png)
 
 #### Descripción de la Arquitectura del Servicio
 
